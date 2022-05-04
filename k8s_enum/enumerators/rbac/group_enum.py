@@ -63,6 +63,7 @@ class GroupEnumerator(BaseEnum):
             rows.append([group.name, attached_roles_str, attached_cluster_roles_str])
         return [[rows, headers, "grid"]]
 
+
 def enumerate(enum_client, namespace_filters=[]):
     enumerator = GroupEnumerator(enum_client.v1_rbac)
     enumerator.to_table()

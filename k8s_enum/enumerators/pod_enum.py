@@ -1,11 +1,15 @@
 from typing import List
 from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_namespace
-from k8s_enum.enumerators.rbac.service_account_enum import ServiceAccountEnumerator, ServiceAccount
+from k8s_enum.enumerators.rbac.service_account_enum import (
+    ServiceAccountEnumerator,
+    ServiceAccount,
+)
 from termcolor import colored
 from dataclasses import dataclass
 from k8s_enum.enumerators.utils import colored_if_true
 
-@dataclass 
+
+@dataclass
 class ContainerSecurityContext:
     privileged: bool
     allowPrivilegeEscalation: bool
@@ -16,7 +20,7 @@ class ContainerSecurityContext:
     runAsUser: int
 
 
-@dataclass 
+@dataclass
 class PodSecurityContext:
     fs_group: int
     fs_group_change_policy: str
@@ -40,12 +44,28 @@ class PodHostFlags:
     host_paths: list[str]
 
     def to_string(self):
-        h_str = f"Host IPC: {colored_if_true(self.host_ipc, self.host_ipc, 'yellow')} \n" if self.host_ipc else ""
-        h_str += f"Host Network: {colored_if_true(self.host_network, self.host_network, 'yellow')} \n" if self.host_network else ""
-        h_str += f"Host PID: {colored_if_true(self.host_pid, self.host_pid, 'yellow')} \n" if self.host_pid else ""
+        h_str = (
+            f"Host IPC: {colored_if_true(self.host_ipc, self.host_ipc, 'yellow')} \n"
+            if self.host_ipc
+            else ""
+        )
+        h_str += (
+            f"Host Network: {colored_if_true(self.host_network, self.host_network, 'yellow')} \n"
+            if self.host_network
+            else ""
+        )
+        h_str += (
+            f"Host PID: {colored_if_true(self.host_pid, self.host_pid, 'yellow')} \n"
+            if self.host_pid
+            else ""
+        )
         h_str += "Host Paths:\n" if self.host_paths else ""
-        h_str += "".join(colored("  - " +str(path.path), "yellow") + "\n" for path in self.host_paths)
+        h_str += "".join(
+            colored("  - " + str(path.path), "yellow") + "\n"
+            for path in self.host_paths
+        )
         return h_str
+
 
 @dataclass
 class Container:
@@ -55,11 +75,11 @@ class Container:
 
     def to_string(self) -> str:
         container_str = f"- Name: {self.name}"
-        container_str+= f"  Image:{self.image}"
-        container_str+= ""
+        container_str += f"  Image:{self.image}"
+        container_str += ""
         container_str = "".join(
-                "- " + str(container.image) + "\n" for container in pod.containers
-            )
+            "- " + str(container.image) + "\n" for container in pod.containers
+        )
         return container_str
 
 
@@ -76,9 +96,7 @@ class Pod:
 
 
 class PodEnumerator(BaseEnum):
-    def __init__(
-        self, enum_client, service_accounts=None
-    ):
+    def __init__(self, enum_client, service_accounts=None):
         self.service_accounts = service_accounts
         if self.service_accounts == None:
             self.service_accounts = ServiceAccountEnumerator(
@@ -120,8 +138,15 @@ class PodEnumerator(BaseEnum):
                     ip_address=pod.status.pod_ip,
                     hot_pod=hot_pod,
                     security_context=None,
-                    pod_host_flags=PodHostFlags(host_ipc=pod.spec.host_ipc,host_network=pod.spec.host_network,host_pid=pod.spec.host_pid,host_paths=host_paths),
-                    containers=[Container(c.name, c.image, None) for c in pod.spec.containers],
+                    pod_host_flags=PodHostFlags(
+                        host_ipc=pod.spec.host_ipc,
+                        host_network=pod.spec.host_network,
+                        host_pid=pod.spec.host_pid,
+                        host_paths=host_paths,
+                    ),
+                    containers=[
+                        Container(c.name, c.image, None) for c in pod.spec.containers
+                    ],
                     attached_service_accounts=attached_service_accounts,
                 )
             )
@@ -139,7 +164,7 @@ class PodEnumerator(BaseEnum):
                 "Host Flags",
                 "Images",
             ]
-            
+
             service_accounts_str = "".join(
                 "- " + sa.namespace + ":" + sa.name + "\n"
                 for sa in pod.attached_service_accounts
