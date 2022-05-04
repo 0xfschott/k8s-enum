@@ -6,7 +6,7 @@ from termcolor import colored
 class BaseEnum(ABC):
     def __init__(self, enum_client):
         self.items = self.enumerate(enum_client)
-    
+
     @abstractmethod
     def enumerate(self):
         pass
@@ -26,11 +26,15 @@ class BaseEnum(ABC):
 
 
 def filter_by_namespace(enumerated_resources, namespace_filter):
-    enumerated_resources[:] = [res for res in enumerated_resources if not_contains_namespace(res, namespace_filter)]
+    enumerated_resources[:] = [
+        res
+        for res in enumerated_resources
+        if not_contains_namespace(res, namespace_filter)
+    ]
 
 
 def not_contains_namespace(res, namespace_filter):
-    if hasattr(res, 'namespace'):
+    if hasattr(res, "namespace"):
         if res.namespace not in namespace_filter:
             return True
     else:

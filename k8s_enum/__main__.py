@@ -25,8 +25,10 @@ class EnumClient:
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-e", "--exclude-namespaces", action='append', default=[])
-parser.add_argument('resources', choices=['all'] + [enumerator for enumerator in ENUMERATORS], nargs='+')
+parser.add_argument("-e", "--exclude-namespaces", action="append", default=[])
+parser.add_argument(
+    "resources", choices=["all"] + [enumerator for enumerator in ENUMERATORS], nargs="+"
+)
 args = parser.parse_args()
 
 # Enable colors for ANSI
@@ -34,7 +36,6 @@ if os.name == "nt":
     os.system("color")
 
 enum_client = EnumClient()
-
 
 
 def main():
