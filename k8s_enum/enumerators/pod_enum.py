@@ -273,7 +273,7 @@ class PodEnumerator(BaseEnum):
         return [[rows, headers, "grid"]]
 
 
-def enumerate(enum_client, namespace_filters=[]):
+def enumerate(enum_client, namespace_filter=None, role_filter=None):
     enumerator = PodEnumerator(enum_client)
-    filter_by_namespace(enumerator.items, namespace_filters)
+    filter_by_namespace(enumerator.items, namespace_filter)
     enumerator.to_table()

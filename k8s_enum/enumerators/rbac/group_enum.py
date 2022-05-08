@@ -1,4 +1,4 @@
-from k8s_enum.enumerators.base_enum import BaseEnum
+from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_role_prefix
 
 
 class Group:
@@ -64,6 +64,7 @@ class GroupEnumerator(BaseEnum):
         return [[rows, headers, "grid"]]
 
 
-def enumerate(enum_client, namespace_filters=[]):
+def enumerate(enum_client, namespace_filter=None, role_filter=None):
     enumerator = GroupEnumerator(enum_client.v1_rbac)
+    filter_by_role_prefix(enumerator.groups, role_filter)
     enumerator.to_table()

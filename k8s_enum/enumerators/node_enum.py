@@ -103,6 +103,6 @@ def enumerate_cni_cidrs(v1_core, cni_plugin):
     return pod_cidrs
 
 
-def enumerate(enum_client, filters=[]):
+def enumerate(enum_client, namespace_filter=None, role_filter=None):
     enumerator = NodeEnumerator(enum_client.v1_core)
     enumerator.to_table()

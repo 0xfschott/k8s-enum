@@ -33,6 +33,24 @@ def filter_by_namespace(enumerated_resources, namespace_filter):
     ]
 
 
+def filter_by_role_prefix(enumerated_resources, role_filter):
+    enumerated_resources[:] = [
+        res
+        for res in enumerated_resources
+        if not_contains_string(res, role_filter)
+    ]
+
+
+def not_contains_string(res, role_filter):
+    if hasattr(res, "name"):
+        for role in role_filter:
+            if res.name.startswith(role):
+                return False
+    else:
+        return False
+    return True
+
+
 def not_contains_namespace(res, namespace_filter):
     if hasattr(res, "namespace"):
         if res.namespace not in namespace_filter:

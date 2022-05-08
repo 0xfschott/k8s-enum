@@ -61,7 +61,7 @@ class UserEnumerator(BaseEnum):
         return [[rows, headers, "grid"]]
 
 
-def enumerate(enum_client, namespace_filters=[str]):
+def enumerate(enum_client, namespace_filter=None, role_filter=None):
     enumerator = UserEnumerator(enum_client)
-    filter_by_namespace(enumerator.items, namespace_filters)
+    filter_by_namespace(enumerator.items, namespace_filter)
     enumerator.to_table()

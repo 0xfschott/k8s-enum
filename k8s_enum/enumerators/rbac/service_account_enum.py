@@ -1,5 +1,4 @@
-from k8s_enum.enumerators.base_enum import BaseEnum
-
+from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_namespace
 
 class ServiceAccount:
     def __init__(
@@ -76,6 +75,7 @@ class ServiceAccountEnumerator(BaseEnum):
         return [[rows, headers, "grid"]]
 
 
-def enumerate(enum_client, namespace_filters=[]):
+def enumerate(enum_client, namespace_filter=None, role_filter=None):
     enumerator = ServiceAccountEnumerator(enum_client)
+    filter_by_namespace(enumerator.service_accounts, namespace_filter)
     enumerator.to_table()

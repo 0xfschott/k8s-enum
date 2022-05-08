@@ -25,7 +25,8 @@ class EnumClient:
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-e", "--exclude-namespaces", action="append", default=[])
+parser.add_argument("-en", "--exclude-namespaces", action="append", default=[])
+parser.add_argument("-er", "--exclude-role-prefix", action="append", default=[])
 parser.add_argument(
     "resources", choices=["all"] + [enumerator for enumerator in ENUMERATORS], nargs="+"
 )
@@ -37,9 +38,11 @@ if os.name == "nt":
 
 enum_client = EnumClient()
 
-
+filters = {
+    "namespace_filter": args.exclude_namespaces,
+    "role_filter": args.exclude_role_prefix
+}
 def main():
     enumerators = load_enumerators(args.resources)
-
     for enumerator in enumerators:
-        enumerator.enumerate(enum_client, args.exclude_namespaces)
+        enumerator.enumerate(enum_client, **filters)

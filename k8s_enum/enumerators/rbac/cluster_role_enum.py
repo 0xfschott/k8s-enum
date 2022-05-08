@@ -1,5 +1,4 @@
-from k8s_enum.enumerators.base_enum import BaseEnum
-from k8s_enum.enumerators.rbac import SYSTEM_CLUSTER_ROLES
+from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_role_prefix
 
 
 class ClusterRole:
@@ -9,11 +8,11 @@ class ClusterRole:
 
 
 class ClusterRoleEnumerator(BaseEnum):
-    def __init__(self, v1_rbac, filter_system_namespaces=False):
-        self.cluster_roles = self.enumerate(v1_rbac, filter_system_namespaces)
+    def __init__(self, v1_rbac):
+        self.cluster_roles = self.enumerate(v1_rbac)
         self.header = "Cluster Roles"
 
-    def enumerate(self, v1_rbac, filter_system_namespaces):
+    def enumerate(self, v1_rbac):
         cluster_roles = v1_rbac.list_cluster_role()
 
         enumerated_cluster_roles = []
@@ -23,12 +22,6 @@ class ClusterRoleEnumerator(BaseEnum):
                 ClusterRole(role.metadata.name, rules=role.rules)
             )
 
-        if filter_system_namespaces:
-            enumerated_cluster_roles = [
-                role
-                for role in enumerated_cluster_roles
-                if role.name not in SYSTEM_CLUSTER_ROLES
-            ]
         return enumerated_cluster_roles
 
     def create_rows(self):
@@ -55,6 +48,7 @@ class ClusterRoleEnumerator(BaseEnum):
         return [[rows, headers, "grid"]]
 
 
-def enumerate(enum_client, namespace_filters=[]):
+def enumerate(enum_client, namespace_filter=None, role_filter=None):
     enumerator = ClusterRoleEnumerator(enum_client.v1_rbac)
+    filter_by_role_prefix(enumerator.cluster_roles, role_filter)
     enumerator.to_table()

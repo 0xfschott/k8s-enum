@@ -1,4 +1,4 @@
-from k8s_enum.enumerators.base_enum import BaseEnum
+from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_role_prefix
 from k8s_enum.enumerators import SYSTEM_NAMESPACES
 
 
@@ -59,6 +59,7 @@ class RoleEnumerator(BaseEnum):
         return [[rows, headers, "grid"]]
 
 
-def enumerate(enum_client, namespace_filters=[]):
+def enumerate(enum_client, namespace_filter=None, role_filter=None):
     enumerator = RoleEnumerator(enum_client.v1_rbac)
+    filter_by_role_prefix(enumerator.roles, role_filter)
     enumerator.to_table()
