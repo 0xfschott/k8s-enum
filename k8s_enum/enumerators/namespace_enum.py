@@ -2,6 +2,7 @@ from k8s_enum.enumerators.base_enum import BaseEnum
 from dataclasses import dataclass
 from typing import Any
 
+
 @dataclass
 class Namespace:
     namespace: str

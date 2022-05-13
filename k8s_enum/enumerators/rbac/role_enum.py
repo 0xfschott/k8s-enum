@@ -2,6 +2,7 @@ from k8s_enum.enumerators.base_enum import BaseEnum
 from dataclasses import dataclass, field
 from typing import Any
 
+
 @dataclass
 class Role:
     name: str

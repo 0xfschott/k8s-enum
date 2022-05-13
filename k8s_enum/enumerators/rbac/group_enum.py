@@ -63,4 +63,3 @@ class Enumerator(BaseEnum):
             )
             rows.append([group.name, attached_roles_str, attached_cluster_roles_str])
         return [[rows, headers, "grid"]]
-

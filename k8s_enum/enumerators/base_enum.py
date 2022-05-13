@@ -10,7 +10,7 @@ class BaseEnum(ABC):
         self.header = header
 
     @abstractmethod
-    def enumerate(self,  enum_client):
+    def enumerate(self, enum_client):
         pass
 
     @abstractmethod
@@ -35,9 +35,7 @@ class BaseEnum(ABC):
 
     def filter_by_namespace(self, namespace_filter):
         self.items = [
-            res
-            for res in self.items
-            if not_contains_namespace(res, namespace_filter)
+            res for res in self.items if not_contains_namespace(res, namespace_filter)
         ]
 
     def filter_by_role_prefix(self, role_filter):

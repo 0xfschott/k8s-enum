@@ -12,7 +12,7 @@ class Secret:
 
 
 class Enumerator(BaseEnum):
-    def __init__(self, enum_client)-> None:
+    def __init__(self, enum_client) -> None:
         super().__init__(enum_client, "Secrets")
 
     def enumerate(self, enum_client) -> list[Secret]:
@@ -45,4 +45,3 @@ class Enumerator(BaseEnum):
                 )
             rows.append([secret.name, secret.namespace, data_str])
         return [[rows, headers, "grid"]]
-
