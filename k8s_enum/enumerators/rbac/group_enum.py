@@ -1,5 +1,6 @@
-from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_role_prefix
+from k8s_enum.enumerators.base_enum import BaseEnum
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -9,15 +10,15 @@ class Group:
     attached_cluster_roles: list[str] = field(default_factory=lambda: [])
 
 
-class GroupEnumerator(BaseEnum):
-    def __init__(self, enum_client):
+class Enumerator(BaseEnum):
+    def __init__(self, enum_client) -> None:
         super().__init__(enum_client, "Groups")
 
-    def enumerate(self, enum_client):
+    def enumerate(self, enum_client) -> list[Group]:
         role_bindings = enum_client.v1_rbac.list_role_binding_for_all_namespaces()
         cluster_role_bindings = enum_client.v1_rbac.list_cluster_role_binding()
 
-        enumerated_groups = []
+        enumerated_groups: list[Group] = []
 
         for rb in role_bindings.items:
             for subject in rb.subjects:
@@ -48,7 +49,7 @@ class GroupEnumerator(BaseEnum):
 
         return enumerated_groups
 
-    def create_rows(self):
+    def create_rows(self) -> list[list[Any]]:
         rows = []
         headers = ["Group", "Attached Roles", "Attached Cluster Roles"]
         for group in self.items:
@@ -63,8 +64,3 @@ class GroupEnumerator(BaseEnum):
             rows.append([group.name, attached_roles_str, attached_cluster_roles_str])
         return [[rows, headers, "grid"]]
 
-
-def enumerate(enum_client, namespace_filter=None, role_filter=None):
-    enumerator = GroupEnumerator(enum_client)
-    filter_by_role_prefix(enumerator.items, role_filter)
-    enumerator.to_table()

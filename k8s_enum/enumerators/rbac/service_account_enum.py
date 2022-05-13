@@ -1,6 +1,6 @@
-from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_namespace
+from k8s_enum.enumerators.base_enum import BaseEnum
 from dataclasses import dataclass, field
-
+from typing import Any
 
 @dataclass
 class ServiceAccount:
@@ -10,11 +10,11 @@ class ServiceAccount:
     attached_cluster_roles: list[str] = field(default_factory=lambda: [])
 
 
-class ServiceAccountEnumerator(BaseEnum):
-    def __init__(self, enum_client):
+class Enumerator(BaseEnum):
+    def __init__(self, enum_client) -> None:
         super().__init__(enum_client, "Service Accounts")
 
-    def enumerate(self, enum_client):
+    def enumerate(self, enum_client) -> list[ServiceAccount]:
         service_accounts = enum_client.v1_core.list_service_account_for_all_namespaces()
         role_bindings = enum_client.v1_rbac.list_role_binding_for_all_namespaces()
         cluster_role_bindings = enum_client.v1_rbac.list_cluster_role_binding()
@@ -51,7 +51,7 @@ class ServiceAccountEnumerator(BaseEnum):
 
         return enumerated_service_accounts
 
-    def create_rows(self):
+    def create_rows(self) -> list[list[Any]]:
         rows = []
         headers = [
             "Service Account",
@@ -72,9 +72,3 @@ class ServiceAccountEnumerator(BaseEnum):
                 [sa.name, sa.namespace, attached_roles_str, attached_cluster_roles_str]
             )
         return [[rows, headers, "grid"]]
-
-
-def enumerate(enum_client, namespace_filter=None, role_filter=None):
-    enumerator = ServiceAccountEnumerator(enum_client)
-    filter_by_namespace(enumerator.items, namespace_filter)
-    enumerator.to_table()

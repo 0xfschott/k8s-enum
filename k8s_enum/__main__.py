@@ -2,7 +2,6 @@ import os
 import argparse
 from kubernetes import client, config
 from k8s_enum.loader import ENUMERATORS, load_enumerators
-from k8s_enum.enumerators.base_enum import filter_by_namespace
 
 
 print(
@@ -18,7 +17,7 @@ Kubernetes Enumerator
 
 # TODO: Move
 class EnumClient:
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None) -> None:
         config.load_kube_config(config_file=config_file)
         self.v1_core = client.CoreV1Api()
         self.v1_rbac = client.RbacAuthorizationV1Api()
@@ -44,7 +43,7 @@ filters = {
 }
 
 
-def main():
-    enumerators = load_enumerators(args.resources)
-    for enumerator in enumerators:
-        enumerator.enumerate(enum_client, **filters)
+def main() -> None:
+    modules = load_enumerators(args.resources)
+    for enum_module in modules:
+        enum_module.Enumerator(enum_client).create_output(**filters)

@@ -1,5 +1,5 @@
 from importlib import import_module
-from typing import List
+from typing import Any
 
 ENUMERATORS = {
     "nodes": "k8s_enum.enumerators.node_enum",
@@ -14,7 +14,7 @@ ENUMERATORS = {
 }
 
 
-def load_enumerators(enumerators: List[str] = []) -> None:
+def load_enumerators(enumerators: list[str] = []) -> Any:
     if "all" in enumerators:
-        enumerators = ENUMERATORS
+        enumerators = [enumerator for enumerator in ENUMERATORS]
     return [import_module(ENUMERATORS[enumerator]) for enumerator in enumerators]

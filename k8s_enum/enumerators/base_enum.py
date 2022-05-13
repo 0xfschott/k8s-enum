@@ -1,6 +1,7 @@
 from tabulate import tabulate
 from abc import ABC, abstractmethod
 from termcolor import colored
+from typing import Any
 
 
 class BaseEnum(ABC):
@@ -9,11 +10,11 @@ class BaseEnum(ABC):
         self.header = header
 
     @abstractmethod
-    def enumerate(self):
+    def enumerate(self,  enum_client):
         pass
 
     @abstractmethod
-    def create_rows(self):
+    def create_rows(self) -> list[list[Any]]:
         pass
 
     def to_table(self):
@@ -25,19 +26,24 @@ class BaseEnum(ABC):
                 headers = [colored(header, attrs=["bold"]) for header in row[1]]
                 print(tabulate(row[0], headers=headers, tablefmt=row[2]))
 
+    def create_output(self, namespace_filter=None, role_filter=None):
+        if namespace_filter:
+            self.filter_by_namespace(namespace_filter)
+        if role_filter:
+            self.filter_by_role_prefix(role_filter)
+        self.to_table()
 
-def filter_by_namespace(enumerated_resources, namespace_filter):
-    enumerated_resources[:] = [
-        res
-        for res in enumerated_resources
-        if not_contains_namespace(res, namespace_filter)
-    ]
+    def filter_by_namespace(self, namespace_filter):
+        self.items = [
+            res
+            for res in self.items
+            if not_contains_namespace(res, namespace_filter)
+        ]
 
-
-def filter_by_role_prefix(enumerated_resources, role_filter):
-    enumerated_resources[:] = [
-        res for res in enumerated_resources if not_contains_string(res, role_filter)
-    ]
+    def filter_by_role_prefix(self, role_filter):
+        self.items = [
+            res for res in self.items if not_contains_string(res, role_filter)
+        ]
 
 
 def not_contains_string(res, role_filter):

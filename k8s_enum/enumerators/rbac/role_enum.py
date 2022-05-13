@@ -1,6 +1,6 @@
-from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_role_prefix
+from k8s_enum.enumerators.base_enum import BaseEnum
 from dataclasses import dataclass, field
-
+from typing import Any
 
 @dataclass
 class Role:
@@ -9,11 +9,11 @@ class Role:
     rules: list[str] = field(default_factory=lambda: [])
 
 
-class RoleEnumerator(BaseEnum):
-    def __init__(self, enum_client):
+class Enumerator(BaseEnum):
+    def __init__(self, enum_client) -> None:
         super().__init__(enum_client, "Roles")
 
-    def enumerate(self, enum_client):
+    def enumerate(self, enum_client) -> list[Role]:
         roles = enum_client.v1_rbac.list_role_for_all_namespaces()
 
         enumerated_roles = []
@@ -29,7 +29,7 @@ class RoleEnumerator(BaseEnum):
 
         return enumerated_roles
 
-    def create_rows(self):
+    def create_rows(self) -> list[list[Any]]:
         rows = []
         headers = ["Name", "Namespace", "Rules"]
         for role in self.items:
@@ -50,9 +50,3 @@ class RoleEnumerator(BaseEnum):
                     rules_str += "- " + p[2] + " " + res_name + p[1] + "\n"
             rows.append([role.name, role.namespace, rules_str])
         return [[rows, headers, "grid"]]
-
-
-def enumerate(enum_client, namespace_filter=None, role_filter=None):
-    enumerator = RoleEnumerator(enum_client)
-    filter_by_role_prefix(enumerator.items, role_filter)
-    enumerator.to_table()

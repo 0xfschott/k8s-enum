@@ -1,22 +1,20 @@
-from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_namespace
-from k8s_enum.enumerators.rbac.service_account_enum import (
-    ServiceAccountEnumerator,
-    ServiceAccount,
-)
+from k8s_enum.enumerators.base_enum import BaseEnum
+import k8s_enum.enumerators.rbac.service_account_enum as service_account_enum
 from termcolor import colored
 from dataclasses import dataclass
 from k8s_enum.enumerators.utils import colored_if_true
+from typing import Optional, Any
 
 
 @dataclass
 class ContainerSecurityContext:
-    privileged: bool
-    allow_privilege_escalation: bool
-    capabilities: list[str]
-    readOnlyRootFileSystem: bool
-    run_as_group: int
-    run_as_non_root: bool
-    run_as_user: int
+    privileged: Optional[bool]
+    allow_privilege_escalation: Optional[bool]
+    capabilities: Optional[list[str]]
+    readOnlyRootFileSystem: Optional[bool]
+    run_as_group: Optional[int]
+    run_as_non_root: Optional[bool]
+    run_as_user: Optional[int]
 
     def to_string(self):
         sec_str = (
@@ -142,15 +140,15 @@ class Pod:
     pod_host_flags: PodHostFlags
     security_context: PodSecurityContext
     containers: list[Container]
-    attached_service_accounts: list[ServiceAccount]
+    attached_service_accounts: list[service_account_enum.ServiceAccount]
 
 
-class PodEnumerator(BaseEnum):
-    def __init__(self, enum_client):
-        self.service_accounts = ServiceAccountEnumerator(enum_client).items
+class Enumerator(BaseEnum):
+    def __init__(self, enum_client) -> None:
+        self.service_accounts = service_account_enum.Enumerator(enum_client).items
         super().__init__(enum_client, "Pods")
 
-    def enumerate(self, enum_client):
+    def enumerate(self, enum_client) -> list[Pod]:
         pods = enum_client.v1_core.list_pod_for_all_namespaces()
 
         enumerated_pods = []
@@ -225,7 +223,7 @@ class PodEnumerator(BaseEnum):
 
         return enumerated_pods
 
-    def create_rows(self):
+    def create_rows(self) -> list[list[Any]]:
         rows = []
         for pod in self.items:
             headers = [
@@ -261,9 +259,3 @@ class PodEnumerator(BaseEnum):
                 ]
             )
         return [[rows, headers, "grid"]]
-
-
-def enumerate(enum_client, namespace_filter=None, role_filter=None):
-    enumerator = PodEnumerator(enum_client)
-    filter_by_namespace(enumerator.items, namespace_filter)
-    enumerator.to_table()

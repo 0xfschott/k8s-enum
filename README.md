@@ -31,8 +31,7 @@ Results can also be filtered by a role prefix. Predefined roles like `system:con
 ## Extension
 In order to create a new enumeration plugin, at least the following steps are required:
 
-1. Create a new module with a class `MyEnumerator` which extends `BaseEnum` and thus have the methods `enumerate(..)` and `create_rows(..)`.
-2. Create a function `enumerate(enum_client, ...)` within the module (see other modules for an example).
+1. Create a new module with a class `Enumerator` which extends `BaseEnum` and thus has the methods `enumerate(..)` and `create_rows(..)` which have to be overwritten.
 2. Register the Enumerator in `loader.py`.
 
 

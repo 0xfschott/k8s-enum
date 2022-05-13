@@ -1,6 +1,7 @@
 from k8s_enum.enumerators.base_enum import BaseEnum
 from k8s_enum.enumerators.helpers.cni_plugin import find_cni_plugin
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -12,16 +13,16 @@ class Node:
     kernel_version: str
     kubelet_version: str
     container_runtime: str
-    addresses: list[(str, str)]
+    addresses: list[tuple[str, str]]
     pod_cidr: str
     cni: str
 
 
-class NodeEnumerator(BaseEnum):
-    def __init__(self, enum_client):
+class Enumerator(BaseEnum):
+    def __init__(self, enum_client) -> None:
         super().__init__(enum_client, "Master/Worker-Nodes")
 
-    def enumerate(self, enum_client):
+    def enumerate(self, enum_client) -> list[Node]:
         cni_plugin = find_cni_plugin(enum_client.v1_core)
         if cni_plugin != "kubenet":
             pod_cidrs = enumerate_cni_cidrs(enum_client.v1_core, cni_plugin)
@@ -54,7 +55,7 @@ class NodeEnumerator(BaseEnum):
             )
         return enumerated_nodes
 
-    def create_rows(self):
+    def create_rows(self) -> list[list[Any]]:
         nodes = []
         for node in self.items:
             rows = []
@@ -88,8 +89,3 @@ def enumerate_cni_cidrs(v1_core, cni_plugin):
         for ip in calico_ip_info["items"]:
             pod_cidrs[ip["spec"]["affinity"].split(":")[1]] = ip["spec"]["cidr"]
     return pod_cidrs
-
-
-def enumerate(enum_client, namespace_filter=None, role_filter=None):
-    enumerator = NodeEnumerator(enum_client)
-    enumerator.to_table()
