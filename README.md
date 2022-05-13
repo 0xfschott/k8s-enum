@@ -29,9 +29,9 @@ k8sEnum -en default -en kube-system all
 Results can also be filtered by a role prefix. Predefined roles like `system:controller:certificate-controller` with the prefix `system:` could e.g. be excluded with `k8sEnum -er system: all`.
 
 ## Extension
-In order to create a new enumeration plugin, at the following steps are required:
+In order to create a new enumeration plugin, at least the following steps are required:
 
-1. Create a new module with a class ``MyEnumerator` which extends `BaseEnum` and thus have the methods `enumerate(..)` and `create_rows(..)`.
+1. Create a new module with a class `MyEnumerator` which extends `BaseEnum` and thus have the methods `enumerate(..)` and `create_rows(..)`.
 2. Create a function `enumerate(enum_client, ...)` within the module (see other modules for an example).
 2. Register the Enumerator in `loader.py`.
 
