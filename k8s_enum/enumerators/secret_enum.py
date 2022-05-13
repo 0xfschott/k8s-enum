@@ -1,19 +1,18 @@
 import base64
 from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_namespace
-from k8s_enum.enumerators import SYSTEM_NAMESPACES
+from dataclasses import dataclass
 
 
+@dataclass
 class Secret:
-    def __init__(self, name, *, namespace, data):
-        self.name = name
-        self.namespace = namespace
-        self.data = data
+    name: str
+    namespace: str
+    data: dict
 
 
 class SecretEnumerator(BaseEnum):
     def __init__(self, enum_client):
-        super().__init__(enum_client)
-        self.header = "Secrets"
+        super().__init__(enum_client, "Secrets")
 
     def enumerate(self, enum_client):
         secrets = enum_client.v1_core.list_secret_for_all_namespaces()

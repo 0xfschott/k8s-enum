@@ -1,15 +1,15 @@
 from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_namespace
+from dataclasses import dataclass
 
 
+@dataclass
 class Namespace:
-    def __init__(self, namespace: str):
-        self.namespace = namespace
+    namespace: str
 
 
 class NamespaceEnumerator(BaseEnum):
     def __init__(self, enum_client):
-        self.items = self.enumerate(enum_client)
-        self.header = "Namespaces"
+        super().__init__(enum_client, "Namespaces")
 
     def enumerate(self, enum_client):
         namespaces = enum_client.v1_core.list_namespace()

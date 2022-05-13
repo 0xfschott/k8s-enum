@@ -40,8 +40,10 @@ enum_client = EnumClient()
 
 filters = {
     "namespace_filter": args.exclude_namespaces,
-    "role_filter": args.exclude_role_prefix
+    "role_filter": args.exclude_role_prefix,
 }
+
+
 def main():
     enumerators = load_enumerators(args.resources)
     for enumerator in enumerators:

@@ -1,24 +1,23 @@
 from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_namespace
+from dataclasses import dataclass, field
 
+
+@dataclass
 class ServiceAccount:
-    def __init__(
-        self, name, *, namespace, attached_roles=[], attached_cluster_roles=[]
-    ) -> None:
-        self.name = name
-        self.namespace = namespace
-        self.attached_roles = attached_roles[:]
-        self.attached_cluster_roles = attached_cluster_roles[:]
+    name: str
+    namespace: str
+    attached_roles: list[str] = field(default_factory=lambda: [])
+    attached_cluster_roles: list[str] = field(default_factory=lambda: [])
 
 
 class ServiceAccountEnumerator(BaseEnum):
     def __init__(self, enum_client):
-        self.service_accounts = self.enumerate(enum_client.v1_core, enum_client.v1_rbac)
-        self.header = "Service Accounts"
+        super().__init__(enum_client, "Service Accounts")
 
-    def enumerate(self, v1_core, v1_rbac):
-        service_accounts = v1_core.list_service_account_for_all_namespaces()
-        role_bindings = v1_rbac.list_role_binding_for_all_namespaces()
-        cluster_role_bindings = v1_rbac.list_cluster_role_binding()
+    def enumerate(self, enum_client):
+        service_accounts = enum_client.v1_core.list_service_account_for_all_namespaces()
+        role_bindings = enum_client.v1_rbac.list_role_binding_for_all_namespaces()
+        cluster_role_bindings = enum_client.v1_rbac.list_cluster_role_binding()
 
         enumerated_service_accounts = []
 
@@ -60,7 +59,7 @@ class ServiceAccountEnumerator(BaseEnum):
             "Attached Roles",
             "Attached Cluster Roles",
         ]
-        for sa in self.service_accounts:
+        for sa in self.items:
             attached_roles = sa.attached_roles
             attached_roles_str = "".join(
                 "- " + str(role) + "\n" for role in attached_roles
@@ -77,5 +76,5 @@ class ServiceAccountEnumerator(BaseEnum):
 
 def enumerate(enum_client, namespace_filter=None, role_filter=None):
     enumerator = ServiceAccountEnumerator(enum_client)
-    filter_by_namespace(enumerator.service_accounts, namespace_filter)
+    filter_by_namespace(enumerator.items, namespace_filter)
     enumerator.to_table()

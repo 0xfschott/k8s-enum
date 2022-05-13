@@ -1,45 +1,32 @@
 from k8s_enum.enumerators.base_enum import BaseEnum
 from k8s_enum.enumerators.helpers.cni_plugin import find_cni_plugin
+from dataclasses import dataclass
 
 
+@dataclass
 class Node:
-    def __init__(
-        self,
-        name,
-        *,
-        operating_system,
-        operating_system_image,
-        architecture,
-        kernel_version,
-        kubelet_version,
-        container_runtime,
-        addresses,
-        pod_cidr,
-        cni,
-    ):
-        self.name = name
-        self.operating_system = operating_system
-        self.operating_system_image = operating_system_image
-        self.architecture = architecture
-        self.kernel_version = kernel_version
-        self.kubelet_version = kubelet_version
-        self.container_runtime = container_runtime
-        self.addresses = addresses
-        self.pod_cidr = pod_cidr
-        self.cni = cni
+    name: str
+    operating_system: str
+    operating_system_image: str
+    architecture: str
+    kernel_version: str
+    kubelet_version: str
+    container_runtime: str
+    addresses: list[(str, str)]
+    pod_cidr: str
+    cni: str
 
 
 class NodeEnumerator(BaseEnum):
-    def __init__(self, v1_core):
-        self.nodes = self.enumerate(v1_core)
-        self.header = "Master/Worker-Nodes"
+    def __init__(self, enum_client):
+        super().__init__(enum_client, "Master/Worker-Nodes")
 
-    def enumerate(self, v1_core):
-        cni_plugin = find_cni_plugin(v1_core)
+    def enumerate(self, enum_client):
+        cni_plugin = find_cni_plugin(enum_client.v1_core)
         if cni_plugin != "kubenet":
-            pod_cidrs = enumerate_cni_cidrs(v1_core, cni_plugin)
+            pod_cidrs = enumerate_cni_cidrs(enum_client.v1_core, cni_plugin)
 
-        nodes = v1_core.list_node()
+        nodes = enum_client.v1_core.list_node()
         enumerated_nodes = []
         for node in nodes.items:
             addresses = [
@@ -69,7 +56,7 @@ class NodeEnumerator(BaseEnum):
 
     def create_rows(self):
         nodes = []
-        for node in self.nodes:
+        for node in self.items:
             rows = []
             headers = [node.name, ""]
             for address in node.addresses:
@@ -104,5 +91,5 @@ def enumerate_cni_cidrs(v1_core, cni_plugin):
 
 
 def enumerate(enum_client, namespace_filter=None, role_filter=None):
-    enumerator = NodeEnumerator(enum_client.v1_core)
+    enumerator = NodeEnumerator(enum_client)
     enumerator.to_table()

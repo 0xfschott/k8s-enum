@@ -1,21 +1,20 @@
 from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_role_prefix
-from k8s_enum.enumerators import SYSTEM_NAMESPACES
+from dataclasses import dataclass, field
 
 
+@dataclass
 class Role:
-    def __init__(self, name, *, namespace, rules=[]) -> None:
-        self.name = name
-        self.namespace = namespace
-        self.rules = rules[:]
+    name: str
+    namespace: str
+    rules: list[str] = field(default_factory=lambda: [])
 
 
 class RoleEnumerator(BaseEnum):
-    def __init__(self, v1_rbac, filter_system_namespaces=False):
-        self.roles = self.enumerate(v1_rbac, filter_system_namespaces)
-        self.header = "Roles"
+    def __init__(self, enum_client):
+        super().__init__(enum_client, "Roles")
 
-    def enumerate(self, v1_rbac, filter_system_namespaces):
-        roles = v1_rbac.list_role_for_all_namespaces()
+    def enumerate(self, enum_client):
+        roles = enum_client.v1_rbac.list_role_for_all_namespaces()
 
         enumerated_roles = []
 
@@ -28,18 +27,12 @@ class RoleEnumerator(BaseEnum):
                 )
             )
 
-        if filter_system_namespaces:
-            enumerated_roles = [
-                role
-                for role in enumerated_roles
-                if role.namespace not in SYSTEM_NAMESPACES
-            ]
         return enumerated_roles
 
     def create_rows(self):
         rows = []
         headers = ["Name", "Namespace", "Rules"]
-        for role in self.roles:
+        for role in self.items:
             rules = role.rules
             rules_str = ""
             for rule in rules:
@@ -60,6 +53,6 @@ class RoleEnumerator(BaseEnum):
 
 
 def enumerate(enum_client, namespace_filter=None, role_filter=None):
-    enumerator = RoleEnumerator(enum_client.v1_rbac)
-    filter_by_role_prefix(enumerator.roles, role_filter)
+    enumerator = RoleEnumerator(enum_client)
+    filter_by_role_prefix(enumerator.items, role_filter)
     enumerator.to_table()

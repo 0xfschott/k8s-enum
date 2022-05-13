@@ -130,10 +130,6 @@ class Container:
             else ""
         )
         container_str += f"{self.security_context.to_string()}"
-
-        # container_str = "".join(
-        #    "- " + str(container.image) + "\n" for container in pod.containers
-        # )
         return container_str
 
 
@@ -150,15 +146,9 @@ class Pod:
 
 
 class PodEnumerator(BaseEnum):
-    def __init__(self, enum_client, service_accounts=None):
-        self.service_accounts = service_accounts
-        if self.service_accounts == None:
-            self.service_accounts = ServiceAccountEnumerator(
-                enum_client
-            ).service_accounts
-
-        super().__init__(enum_client)
-        self.header = "Pods"
+    def __init__(self, enum_client):
+        self.service_accounts = ServiceAccountEnumerator(enum_client).items
+        super().__init__(enum_client, "Pods")
 
     def enumerate(self, enum_client):
         pods = enum_client.v1_core.list_pod_for_all_namespaces()

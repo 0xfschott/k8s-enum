@@ -4,8 +4,9 @@ from termcolor import colored
 
 
 class BaseEnum(ABC):
-    def __init__(self, enum_client):
+    def __init__(self, enum_client, header: str):
         self.items = self.enumerate(enum_client)
+        self.header = header
 
     @abstractmethod
     def enumerate(self):
@@ -35,9 +36,7 @@ def filter_by_namespace(enumerated_resources, namespace_filter):
 
 def filter_by_role_prefix(enumerated_resources, role_filter):
     enumerated_resources[:] = [
-        res
-        for res in enumerated_resources
-        if not_contains_string(res, role_filter)
+        res for res in enumerated_resources if not_contains_string(res, role_filter)
     ]
 
 

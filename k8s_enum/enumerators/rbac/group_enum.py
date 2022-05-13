@@ -1,21 +1,21 @@
 from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_role_prefix
+from dataclasses import dataclass, field
 
 
+@dataclass
 class Group:
-    def __init__(self, name, attached_roles=[], attached_cluster_roles=[]) -> None:
-        self.name = name
-        self.attached_roles = attached_roles[:]
-        self.attached_cluster_roles = attached_cluster_roles[:]
+    name: str
+    attached_roles: list[str] = field(default_factory=lambda: [])
+    attached_cluster_roles: list[str] = field(default_factory=lambda: [])
 
 
 class GroupEnumerator(BaseEnum):
-    def __init__(self, v1_rbac):
-        self.groups = self.enumerate(v1_rbac)
-        self.header = "Groups"
+    def __init__(self, enum_client):
+        super().__init__(enum_client, "Groups")
 
-    def enumerate(self, v1_rbac):
-        role_bindings = v1_rbac.list_role_binding_for_all_namespaces()
-        cluster_role_bindings = v1_rbac.list_cluster_role_binding()
+    def enumerate(self, enum_client):
+        role_bindings = enum_client.v1_rbac.list_role_binding_for_all_namespaces()
+        cluster_role_bindings = enum_client.v1_rbac.list_cluster_role_binding()
 
         enumerated_groups = []
 
@@ -51,7 +51,7 @@ class GroupEnumerator(BaseEnum):
     def create_rows(self):
         rows = []
         headers = ["Group", "Attached Roles", "Attached Cluster Roles"]
-        for group in self.groups:
+        for group in self.items:
             attached_roles = group.attached_roles
             attached_roles_str = "".join(
                 "- " + str(role) + "\n" for role in attached_roles
@@ -65,6 +65,6 @@ class GroupEnumerator(BaseEnum):
 
 
 def enumerate(enum_client, namespace_filter=None, role_filter=None):
-    enumerator = GroupEnumerator(enum_client.v1_rbac)
-    filter_by_role_prefix(enumerator.groups, role_filter)
+    enumerator = GroupEnumerator(enum_client)
+    filter_by_role_prefix(enumerator.items, role_filter)
     enumerator.to_table()

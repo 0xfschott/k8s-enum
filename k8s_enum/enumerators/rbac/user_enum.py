@@ -1,17 +1,17 @@
 from k8s_enum.enumerators.base_enum import BaseEnum, filter_by_namespace
+from dataclasses import dataclass, field
 
 
+@dataclass
 class User:
-    def __init__(self, name, attached_roles=[], attached_cluster_roles=[]) -> None:
-        self.name = name
-        self.attached_roles = attached_roles[:]
-        self.attached_cluster_roles = attached_cluster_roles[:]
+    name: str
+    attached_roles: list[str] = field(default_factory=lambda: [])
+    attached_cluster_roles: list[str] = field(default_factory=lambda: [])
 
 
 class UserEnumerator(BaseEnum):
     def __init__(self, enum_client):
-        super().__init__(enum_client)
-        self.header = "Users"
+        super().__init__(enum_client, "Users")
 
     def enumerate(self, enum_client):
         role_bindings = enum_client.v1_rbac.list_role_binding_for_all_namespaces()
